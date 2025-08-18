@@ -1,63 +1,76 @@
-// Simple authentication for MVP - replace with proper auth in production
+// Authentication using Prisma and database
 import crypto from 'crypto';
-
-// Hardcoded users for MVP
-const USERS = [
-  {
-    id: '1',
-    name: 'Noah Cheyer',
-    email: 'noah@speakabout.ai',
-    password: hashPassword('StrongCheyer2025!'),
-  }
-];
+import { prisma } from './db';
 
 function hashPassword(password: string): string {
   return crypto.createHash('sha256').update(password).digest('hex');
 }
 
 export async function authenticateUser(email: string, password: string) {
-  const user = USERS.find(u => u.email === email);
-  
-  if (!user) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
+    
+    if (!user) {
+      return null;
+    }
+    
+    const hashedPassword = hashPassword(password);
+    if (user.password !== hashedPassword) {
+      return null;
+    }
+    
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  } catch (error) {
+    console.error('Authentication error:', error);
     return null;
   }
-  
-  const hashedPassword = hashPassword(password);
-  if (user.password !== hashedPassword) {
-    return null;
-  }
-  
-  // Return user without password
-  const { password: _, ...userWithoutPassword } = user;
-  return userWithoutPassword;
 }
 
 export async function createUser(name: string, email: string, password: string) {
-  // Check if user exists
-  const existingUser = USERS.find(u => u.email === email);
-  if (existingUser) {
-    throw new Error('User already exists');
+  try {
+    // Check if user exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    });
+    
+    if (existingUser) {
+      throw new Error('User already exists');
+    }
+    
+    // Create new user in database
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashPassword(password),
+      }
+    });
+    
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = newUser;
+    return userWithoutPassword;
+  } catch (error) {
+    console.error('Create user error:', error);
+    throw error;
   }
-  
-  // Create new user
-  const newUser = {
-    id: String(USERS.length + 1),
-    name,
-    email,
-    password: hashPassword(password),
-  };
-  
-  USERS.push(newUser);
-  
-  // Return user without password
-  const { password: _, ...userWithoutPassword } = newUser;
-  return userWithoutPassword;
 }
 
 export async function getUserById(id: string) {
-  const user = USERS.find(u => u.id === id);
-  if (!user) return null;
-  
-  const { password: _, ...userWithoutPassword } = user;
-  return userWithoutPassword;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id }
+    });
+    
+    if (!user) return null;
+    
+    const { password: _, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  } catch (error) {
+    console.error('Get user error:', error);
+    return null;
+  }
 }

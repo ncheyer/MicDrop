@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, ExternalLink, Eye, Download, Mail, Mic, LogOut, BarChart, Users, Calendar } from "lucide-react";
+import { Plus, ExternalLink, Eye, Download, Mail, Mic, LogOut, BarChart, Users, Calendar, Trash2 } from "lucide-react";
 
 interface User {
   id: string;
@@ -26,6 +26,9 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [talkPages, setTalkPages] = useState<TalkPageSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [pageToDelete, setPageToDelete] = useState<TalkPageSummary | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     // Check if user is logged in
@@ -38,36 +41,75 @@ export default function DashboardPage() {
     const userData = JSON.parse(userStr);
     setUser(userData);
 
-    // Load talk pages (mock data for now)
-    const mockPages: TalkPageSummary[] = [
-      {
-        id: "1",
-        title: "AI in Events: Transform Your Operations in 30 Days",
-        slug: "ai-events-2025",
-        date: "2025-01-15",
-        views: 245,
-        leads: 42,
-        published: true,
-      },
-      {
-        id: "2",
-        title: "The Future of AI Speakers",
-        slug: "future-ai-speakers",
-        date: "2025-02-20",
-        views: 0,
-        leads: 0,
-        published: false,
-      },
-    ];
-    
-    setTalkPages(mockPages);
-    setLoading(false);
+    // Load talk pages from database
+    fetchTalkPages();
   }, [router]);
+
+  const fetchTalkPages = async () => {
+    try {
+      const response = await fetch("/api/talk-pages");
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Transform the data to match our interface
+        const pages: TalkPageSummary[] = data.map((page: any) => ({
+          id: page.id,
+          title: page.title,
+          slug: page.slug,
+          date: page.date,
+          views: page._count?.analytics || 0,
+          leads: page._count?.emailCaptures || 0,
+          published: page.published,
+        }));
+        
+        setTalkPages(pages);
+      }
+    } catch (error) {
+      console.error("Error fetching talk pages:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("user");
     document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     router.push("/");
+  };
+
+  const handleDeleteClick = (page: TalkPageSummary) => {
+    setPageToDelete(page);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!pageToDelete) return;
+    
+    setDeleting(true);
+    try {
+      const response = await fetch(`/api/talk-pages/${pageToDelete.id}`, {
+        method: "DELETE",
+      });
+      
+      if (response.ok) {
+        // Remove the page from the list
+        setTalkPages(talkPages.filter(p => p.id !== pageToDelete.id));
+        setDeleteModalOpen(false);
+        setPageToDelete(null);
+      } else {
+        alert("Failed to delete the page. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error deleting page:", error);
+      alert("An error occurred while deleting the page.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setPageToDelete(null);
   };
 
   if (loading) {
@@ -209,21 +251,33 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Link
+                        href={`/talk/${page.slug}`}
+                        target="_blank"
+                        className="px-3 py-1.5 text-sm text-primary-600 hover:text-primary-700 border border-primary-600 rounded-lg hover:bg-primary-50 flex items-center gap-1"
+                      >
+                        <Eye className="h-3 w-3" />
+                        Preview
+                      </Link>
+                      <Link
+                        href={`/dashboard/analytics/${page.id}`}
+                        className="px-3 py-1.5 text-sm text-gray-700 hover:text-gray-900 border rounded-lg hover:bg-gray-50 flex items-center gap-1"
+                      >
+                        <BarChart className="h-3 w-3" />
+                        Analytics
+                      </Link>
+                      <Link
                         href={`/dashboard/edit/${page.id}`}
                         className="px-3 py-1.5 text-sm text-gray-700 hover:text-gray-900 border rounded-lg hover:bg-gray-50"
                       >
                         Edit
                       </Link>
-                      {page.published && (
-                        <Link
-                          href={`/talk/${page.slug}`}
-                          target="_blank"
-                          className="px-3 py-1.5 text-sm text-primary-600 hover:text-primary-700 border border-primary-600 rounded-lg hover:bg-primary-50 flex items-center gap-1"
-                        >
-                          View
-                          <ExternalLink className="h-3 w-3" />
-                        </Link>
-                      )}
+                      <button
+                        onClick={() => handleDeleteClick(page)}
+                        className="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 border border-red-600 rounded-lg hover:bg-red-50 flex items-center gap-1"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        Delete
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -243,6 +297,49 @@ export default function DashboardPage() {
           </ul>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-red-100 rounded-full p-2">
+                <Trash2 className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold">Delete Talk Page</h3>
+            </div>
+            
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete <strong>"{pageToDelete?.title}"</strong>? 
+              This action cannot be undone and will permanently remove:
+            </p>
+            
+            <ul className="list-disc list-inside text-sm text-gray-600 mb-6 space-y-1">
+              <li>All page content and settings</li>
+              <li>Associated GPTs and resources</li>
+              <li>Analytics and email captures</li>
+              <li>The public page URL</li>
+            </ul>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={handleDeleteCancel}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete Page"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

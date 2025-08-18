@@ -43,4 +43,4 @@ temp/
 # Package manager locks (uncomment as needed)
 # package-lock.json
 # yarn.lock
-# pnpm-lock.yaml
+# pnpm-lock.yaml.next/
