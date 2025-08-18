@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  talkPages     TalkPage[]
+}
+
+model TalkPage {
+  id                String    @id @default(cuid())
+  slug              String    @unique
+  title             String
+  date              DateTime
+  published         Boolean   @default(false)
+  
+  // Speaker Info
+  speakerName       String
+  speakerEmail      String
+  speakerPhoto      String?
+  speakerBio        String?
+  speakerLinkedIn   String?
+  
+  // Content
+  hook              String?
+  keynoteNotesUrl   String?
+  keynoteSlidesUrl  String?
+  
+  // Contact
+  contactEmail      String?
+  calendarLink      String?
+  
+  // Newsletter
+  newsletterEnabled     Boolean @default(false)
+  newsletterDescription String?
+  newsletterSignupUrl   String?
+  
+  // Metadata
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  userId            String
+  user              User      @relation(fields: [userId], references: [id])
+  
+  // Relations
+  customGpts        CustomGPT[]
+  downloads         Download[]
+  businessLinks     BusinessLink[]
+  emailCaptures     EmailCapture[]
+  analytics         Analytics[]
+}
+
+model CustomGPT {
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  url         String
+  clickCount  Int       @default(0)
+  order       Int       @default(0)
+  
+  talkPageId  String
+  talkPage    TalkPage  @relation(fields: [talkPageId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Download {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  fileUrl       String
+  requiresEmail Boolean   @default(false)
+  downloadCount Int       @default(0)
+  order         Int       @default(0)
+  
+  talkPageId    String
+  talkPage      TalkPage  @relation(fields: [talkPageId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model BusinessLink {
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  url         String
+  ctaText     String
+  clickCount  Int       @default(0)
+  order       Int       @default(0)
+  
+  talkPageId  String
+  talkPage    TalkPage  @relation(fields: [talkPageId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model EmailCapture {
+  id          String    @id @default(cuid())
+  email       String
+  name        String?
+  tier        String    // "resources", "newsletter", "consultation"
+  
+  talkPageId  String
+  talkPage    TalkPage  @relation(fields: [talkPageId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime  @default(now())
+  
+  @@unique([email, talkPageId])
+}
+
+model Analytics {
+  id          String    @id @default(cuid())
+  event       String    // "page_view", "gpt_click", "download", "email_signup"
+  data        Json?     // Additional event data
+  
+  talkPageId  String
+  talkPage    TalkPage  @relation(fields: [talkPageId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime  @default(now())
+}
