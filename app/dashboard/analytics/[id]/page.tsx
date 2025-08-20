@@ -44,15 +44,26 @@ interface Analytics {
   }>;
 }
 
+interface EmailCapture {
+  id: string;
+  email: string;
+  name: string | null;
+  tier: string;
+  createdAt: string;
+}
+
 export default function AnalyticsPage({ params }: { params: { id: string } }) {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [emailCaptures, setEmailCaptures] = useState<EmailCapture[]>([]);
   const [loading, setLoading] = useState(true);
   const [pageTitle, setPageTitle] = useState("");
   const [timeRange, setTimeRange] = useState("all"); // all, 7days, 30days
+  const [showEmails, setShowEmails] = useState(false);
 
   useEffect(() => {
     fetchAnalytics();
     fetchPageInfo();
+    fetchEmailCaptures();
   }, [params.id]);
 
   const fetchAnalytics = async () => {
@@ -78,6 +89,18 @@ export default function AnalyticsPage({ params }: { params: { id: string } }) {
       }
     } catch (error) {
       console.error("Error fetching page info:", error);
+    }
+  };
+
+  const fetchEmailCaptures = async () => {
+    try {
+      const response = await fetch(`/api/email-capture?talkPageId=${params.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setEmailCaptures(data);
+      }
+    } catch (error) {
+      console.error("Error fetching email captures:", error);
     }
   };
 
@@ -298,6 +321,99 @@ export default function AnalyticsPage({ params }: { params: { id: string } }) {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </div>
+
+        {/* Email Captures Section */}
+        <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Mail className="h-5 w-5 text-purple-600" />
+              Email Captures ({emailCaptures.length})
+            </h2>
+            <button
+              onClick={() => setShowEmails(!showEmails)}
+              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+            >
+              {showEmails ? "Hide List" : "Show List"}
+            </button>
+          </div>
+          
+          {showEmails && (
+            <div className="overflow-x-auto">
+              {emailCaptures.length === 0 ? (
+                <p className="text-gray-500 text-sm">No emails captured yet</p>
+              ) : (
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tier
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date Captured
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {emailCaptures.map((capture) => (
+                      <tr key={capture.id}>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {capture.email}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                          {capture.name || '-'}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                            capture.tier === 'resources' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {capture.tier}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(capture.createdAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+          
+          {emailCaptures.length > 0 && (
+            <div className="mt-4 pt-4 border-t">
+              <button
+                onClick={() => {
+                  const csvContent = "Email,Name,Tier,Date\n" + 
+                    emailCaptures.map(c => 
+                      `"${c.email}","${c.name || ''}","${c.tier}","${new Date(c.createdAt).toISOString()}"`
+                    ).join("\n");
+                  const blob = new Blob([csvContent], { type: 'text/csv' });
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `email-captures-${params.id}.csv`;
+                  a.click();
+                }}
+                className="text-sm bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+              >
+                Export as CSV
+              </button>
             </div>
           )}
         </div>
