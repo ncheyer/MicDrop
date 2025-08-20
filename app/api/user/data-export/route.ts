@@ -28,7 +28,6 @@ export async function GET(request: NextRequest) {
         include: {
           talkPages: {
             include: {
-              speaker: true,
               customGpts: true,
               downloads: true,
               businessLinks: true,
@@ -141,7 +140,7 @@ export async function GET(request: NextRequest) {
       if (analytics.length > 0) {
         userData.data.analytics = analytics.map(record => ({
           event: record.event,
-          timestamp: record.timestamp,
+          timestamp: record.createdAt,
           // Note: We don't include IP addresses or other identifying data
         }));
       }

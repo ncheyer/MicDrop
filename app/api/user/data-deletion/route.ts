@@ -73,19 +73,7 @@ export async function POST(request: NextRequest) {
             where: { talkPageId: talkPage.id },
           });
 
-          // Delete speaker info
-          if (talkPage.speakerId) {
-            await tx.speaker.delete({
-              where: { id: talkPage.speakerId },
-            });
-          }
-
-          // Delete newsletter info
-          if (talkPage.newsletterId) {
-            await tx.newsletter.delete({
-              where: { id: talkPage.newsletterId },
-            });
-          }
+          // Note: Speaker and newsletter info are embedded in TalkPage, not separate entities
 
           // Delete talk page
           await tx.talkPage.delete({
