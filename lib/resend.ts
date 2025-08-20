@@ -1,7 +1,5 @@
 import { Resend } from 'resend';
-import { ToolsWelcomeEmail, generatePlainTextEmail } from './email-templates/tools-welcome';
-import { renderToStaticMarkup } from 'react-dom/server';
-import React from 'react';
+import { generatePlainTextEmail, generateHtmlEmail } from './email-templates/tools-welcome';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -31,15 +29,13 @@ export async function sendWelcomeEmail({
 }: SendWelcomeEmailParams) {
   try {
     // Generate HTML content
-    const htmlContent = renderToStaticMarkup(
-      React.createElement(ToolsWelcomeEmail, {
-        recipientName,
-        speakerName,
-        talkTitle,
-        tools,
-        pageUrl
-      })
-    );
+    const htmlContent = generateHtmlEmail({
+      recipientName,
+      speakerName,
+      talkTitle,
+      tools,
+      pageUrl
+    });
 
     // Generate plain text content
     const textContent = generatePlainTextEmail({
@@ -59,7 +55,7 @@ export async function sendWelcomeEmail({
       subject: `Your AI Implementation Tools from "${talkTitle}"`,
       html: htmlContent,
       text: textContent,
-      reply_to: speakerEmail || undefined,
+      replyTo: speakerEmail || undefined,
     });
 
     if (error) {

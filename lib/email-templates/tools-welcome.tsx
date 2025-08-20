@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface Tool {
   name: string;
   description: string;
@@ -15,290 +13,117 @@ interface ToolsWelcomeEmailProps {
   pageUrl: string;
 }
 
-export function ToolsWelcomeEmail({
+export function generateHtmlEmail({
   recipientName,
   speakerName,
   talkTitle,
   tools,
   pageUrl
-}: ToolsWelcomeEmailProps) {
+}: ToolsWelcomeEmailProps): string {
   const gpts = tools.filter(t => t.type === 'gpt');
   const downloads = tools.filter(t => t.type === 'download');
   const resources = tools.filter(t => t.type === 'resource');
 
-  return (
-    <div style={{
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-      lineHeight: '1.6',
-      color: '#333',
-      maxWidth: '600px',
-      margin: '0 auto',
-      padding: '20px'
-    }}>
-      <div style={{
-        backgroundColor: '#ffffff',
-        borderRadius: '12px',
-        padding: '40px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-      }}>
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <h1 style={{
-            color: '#1a1a1a',
-            fontSize: '28px',
-            fontWeight: '700',
-            margin: '0 0 10px 0'
-          }}>
+  const renderTools = (toolList: Tool[], type: string) => {
+    return toolList.map((tool) => {
+      const icon = type === 'download' ? '📄 ' : '';
+      return `
+        <div style="background-color: #ffffff; border: 1px solid #e1e4e8; border-radius: 6px; padding: 15px; margin-bottom: 10px;">
+          <h3 style="font-size: 16px; font-weight: 600; color: #0969da; margin: 0 0 5px 0;">
+            <a href="${tool.url}" style="color: #0969da; text-decoration: none;">
+              ${icon}${tool.name} →
+            </a>
+          </h3>
+          ${tool.description ? `<p style="font-size: 14px; color: #666; margin: 0;">${tool.description}</p>` : ''}
+        </div>
+      `;
+    }).join('');
+  };
+
+  return `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background-color: #ffffff; border-radius: 12px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #1a1a1a; font-size: 28px; font-weight: 700; margin: 0 0 10px 0;">
             🎉 Your AI Implementation Tools Are Ready!
           </h1>
-          <p style={{
-            color: '#666',
-            fontSize: '16px',
-            margin: '0'
-          }}>
-            From {speakerName}'s talk: "{talkTitle}"
+          <p style="color: #666; font-size: 16px; margin: 0;">
+            From ${speakerName}'s talk: "${talkTitle}"
           </p>
         </div>
 
-        {/* Welcome Message */}
-        <div style={{ marginBottom: '30px' }}>
-          <p style={{ fontSize: '16px', color: '#333' }}>
-            {recipientName ? `Hi ${recipientName},` : 'Hello,'}
+        <!-- Welcome Message -->
+        <div style="margin-bottom: 30px;">
+          <p style="font-size: 16px; color: #333;">
+            ${recipientName ? `Hi ${recipientName},` : 'Hello,'}
           </p>
-          <p style={{ fontSize: '16px', color: '#333' }}>
+          <p style="font-size: 16px; color: #333;">
             Thank you for your interest in the AI implementation tools and resources from my recent talk. 
             I'm excited to share these practical resources that will help you implement AI in your organization.
           </p>
         </div>
 
-        {/* AI Tools Section */}
-        {gpts.length > 0 && (
-          <div style={{
-            backgroundColor: '#f8f9fa',
-            borderRadius: '8px',
-            padding: '20px',
-            marginBottom: '20px'
-          }}>
-            <h2 style={{
-              fontSize: '20px',
-              fontWeight: '600',
-              color: '#1a1a1a',
-              marginTop: '0',
-              marginBottom: '15px',
-              display: 'flex',
-              alignItems: 'center'
-            }}>
+        <!-- AI Tools Section -->
+        ${gpts.length > 0 ? `
+          <div style="background-color: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h2 style="font-size: 20px; font-weight: 600; color: #1a1a1a; margin-top: 0; margin-bottom: 15px;">
               🤖 Custom GPTs & AI Tools
             </h2>
-            {gpts.map((tool, index) => (
-              <div key={index} style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e1e4e8',
-                borderRadius: '6px',
-                padding: '15px',
-                marginBottom: '10px'
-              }}>
-                <h3 style={{
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#0969da',
-                  margin: '0 0 5px 0'
-                }}>
-                  <a href={tool.url} style={{
-                    color: '#0969da',
-                    textDecoration: 'none'
-                  }}>
-                    {tool.name} →
-                  </a>
-                </h3>
-                <p style={{
-                  fontSize: '14px',
-                  color: '#666',
-                  margin: '0'
-                }}>
-                  {tool.description}
-                </p>
-              </div>
-            ))}
+            ${renderTools(gpts, 'gpt')}
           </div>
-        )}
+        ` : ''}
 
-        {/* Downloads Section */}
-        {downloads.length > 0 && (
-          <div style={{
-            backgroundColor: '#f8f9fa',
-            borderRadius: '8px',
-            padding: '20px',
-            marginBottom: '20px'
-          }}>
-            <h2 style={{
-              fontSize: '20px',
-              fontWeight: '600',
-              color: '#1a1a1a',
-              marginTop: '0',
-              marginBottom: '15px',
-              display: 'flex',
-              alignItems: 'center'
-            }}>
+        <!-- Downloads Section -->
+        ${downloads.length > 0 ? `
+          <div style="background-color: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h2 style="font-size: 20px; font-weight: 600; color: #1a1a1a; margin-top: 0; margin-bottom: 15px;">
               📚 Frameworks & Guides
             </h2>
-            {downloads.map((tool, index) => (
-              <div key={index} style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e1e4e8',
-                borderRadius: '6px',
-                padding: '15px',
-                marginBottom: '10px'
-              }}>
-                <h3 style={{
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#0969da',
-                  margin: '0 0 5px 0'
-                }}>
-                  <a href={tool.url} style={{
-                    color: '#0969da',
-                    textDecoration: 'none'
-                  }}>
-                    📄 {tool.name}
-                  </a>
-                </h3>
-                {tool.description && (
-                  <p style={{
-                    fontSize: '14px',
-                    color: '#666',
-                    margin: '0'
-                  }}>
-                    {tool.description}
-                  </p>
-                )}
-              </div>
-            ))}
+            ${renderTools(downloads, 'download')}
           </div>
-        )}
+        ` : ''}
 
-        {/* Resources Section */}
-        {resources.length > 0 && (
-          <div style={{
-            backgroundColor: '#f8f9fa',
-            borderRadius: '8px',
-            padding: '20px',
-            marginBottom: '20px'
-          }}>
-            <h2 style={{
-              fontSize: '20px',
-              fontWeight: '600',
-              color: '#1a1a1a',
-              marginTop: '0',
-              marginBottom: '15px',
-              display: 'flex',
-              alignItems: 'center'
-            }}>
+        <!-- Resources Section -->
+        ${resources.length > 0 ? `
+          <div style="background-color: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h2 style="font-size: 20px; font-weight: 600; color: #1a1a1a; margin-top: 0; margin-bottom: 15px;">
               🔗 Additional Resources
             </h2>
-            {resources.map((tool, index) => (
-              <div key={index} style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e1e4e8',
-                borderRadius: '6px',
-                padding: '15px',
-                marginBottom: '10px'
-              }}>
-                <h3 style={{
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#0969da',
-                  margin: '0 0 5px 0'
-                }}>
-                  <a href={tool.url} style={{
-                    color: '#0969da',
-                    textDecoration: 'none'
-                  }}>
-                    {tool.name} →
-                  </a>
-                </h3>
-                {tool.description && (
-                  <p style={{
-                    fontSize: '14px',
-                    color: '#666',
-                    margin: '0'
-                  }}>
-                    {tool.description}
-                  </p>
-                )}
-              </div>
-            ))}
+            ${renderTools(resources, 'resource')}
           </div>
-        )}
+        ` : ''}
 
-        {/* CTA Button */}
-        <div style={{ textAlign: 'center', margin: '30px 0' }}>
-          <a
-            href={pageUrl}
-            style={{
-              display: 'inline-block',
-              backgroundColor: '#0969da',
-              color: '#ffffff',
-              fontSize: '16px',
-              fontWeight: '600',
-              padding: '12px 30px',
-              borderRadius: '6px',
-              textDecoration: 'none'
-            }}
-          >
+        <!-- CTA Button -->
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${pageUrl}" style="display: inline-block; background-color: #0969da; color: #ffffff; font-size: 16px; font-weight: 600; padding: 12px 30px; border-radius: 6px; text-decoration: none;">
             View All Resources on Landing Page
           </a>
         </div>
 
-        {/* Footer */}
-        <div style={{
-          borderTop: '1px solid #e1e4e8',
-          paddingTop: '20px',
-          marginTop: '30px',
-          textAlign: 'center'
-        }}>
-          <p style={{
-            fontSize: '14px',
-            color: '#666',
-            margin: '0 0 10px 0'
-          }}>
+        <!-- Footer -->
+        <div style="border-top: 1px solid #e1e4e8; padding-top: 20px; margin-top: 30px; text-align: center;">
+          <p style="font-size: 14px; color: #666; margin: 0 0 10px 0;">
             Questions or need help implementing these tools?
           </p>
-          <p style={{
-            fontSize: '14px',
-            color: '#666',
-            margin: '0'
-          }}>
+          <p style="font-size: 14px; color: #666; margin: 0;">
             Feel free to reach out - I'm here to help you succeed with AI!
           </p>
-          <p style={{
-            fontSize: '16px',
-            fontWeight: '600',
-            color: '#333',
-            marginTop: '15px'
-          }}>
+          <p style="font-size: 16px; font-weight: 600; color: #333; margin-top: 15px;">
             Best regards,<br />
-            {speakerName}
+            ${speakerName}
           </p>
         </div>
 
-        {/* Powered by */}
-        <div style={{
-          textAlign: 'center',
-          marginTop: '30px',
-          paddingTop: '20px',
-          borderTop: '1px solid #e1e4e8'
-        }}>
-          <p style={{
-            fontSize: '12px',
-            color: '#999'
-          }}>
-            Powered by <a href="https://speakaboutai.us" style={{ color: '#0969da', textDecoration: 'none' }}>Speak About AI</a>
+        <!-- Powered by -->
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e1e4e8;">
+          <p style="font-size: 12px; color: #999;">
+            Powered by <a href="https://speakaboutai.us" style="color: #0969da; text-decoration: none;">Speak About AI</a>
           </p>
         </div>
       </div>
     </div>
-  );
+  `;
 }
 
 // Plain text version for email clients that don't support HTML
