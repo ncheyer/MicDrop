@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import QRCode from "react-qr-code";
-import { X, Download, Share2, Copy, Check } from "lucide-react";
+import { X, Download, Share2, Copy, Check, RefreshCw } from "lucide-react";
 
 interface QRCodeModalProps {
   isOpen: boolean;
@@ -13,6 +13,8 @@ interface QRCodeModalProps {
 
 export default function QRCodeModal({ isOpen, onClose, url, title }: QRCodeModalProps) {
   const [copied, setCopied] = useState(false);
+  const [qrKey, setQrKey] = useState(Date.now());
+  const [regenerating, setRegenerating] = useState(false);
 
   if (!isOpen) return null;
 
@@ -24,6 +26,15 @@ export default function QRCodeModal({ isOpen, onClose, url, title }: QRCodeModal
     } catch (err) {
       console.error("Failed to copy:", err);
     }
+  };
+
+  const handleRegenerateQR = () => {
+    setRegenerating(true);
+    // Add a small delay to show the regenerating state
+    setTimeout(() => {
+      setQrKey(Date.now());
+      setRegenerating(false);
+    }, 500);
   };
 
   const handleDownloadQR = () => {
@@ -71,10 +82,19 @@ export default function QRCodeModal({ isOpen, onClose, url, title }: QRCodeModal
           </button>
         </div>
 
-        <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-8 mb-6">
+        <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-xl p-8 mb-6 relative">
+          {regenerating && (
+            <div className="absolute inset-0 bg-white/80 rounded-xl flex items-center justify-center z-10">
+              <div className="flex flex-col items-center gap-2">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                <span className="text-sm text-gray-600">Regenerating...</span>
+              </div>
+            </div>
+          )}
           <div id="qr-code-container" className="bg-white rounded-lg p-4 inline-block mx-auto">
             <QRCode
-              value={url}
+              key={qrKey}
+              value={`${url}?qr=${qrKey}`}
               size={200}
               level="H"
               bgColor="#ffffff"
@@ -136,9 +156,18 @@ export default function QRCodeModal({ isOpen, onClose, url, title }: QRCodeModal
         </div>
 
         <div className="mt-6 pt-6 border-t border-gray-200">
-          <p className="text-xs text-gray-500 text-center">
-            Display this QR code at the end of your presentation for easy audience access
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-500">
+              Display at the end of your presentation
+            </p>
+            <button
+              onClick={handleRegenerateQR}
+              disabled={regenerating}
+              className="text-xs text-primary-600 hover:text-primary-700 underline disabled:opacity-50"
+            >
+              Regenerate QR
+            </button>
+          </div>
         </div>
       </div>
     </div>
