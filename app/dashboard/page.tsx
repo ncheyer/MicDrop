@@ -328,6 +328,16 @@ export default function DashboardPage() {
                         <Eye className="h-3 w-3" />
                         Preview
                       </Link>
+                      {page.published && (
+                        <Link
+                          href={`/talk/${page.slug}`}
+                          target="_blank"
+                          className="px-3 py-1.5 text-sm text-white bg-green-600 hover:bg-green-700 rounded-lg flex items-center gap-1"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          View Live
+                        </Link>
+                      )}
                       <Link
                         href={`/dashboard/analytics/${page.id}`}
                         className="px-3 py-1.5 text-sm text-gray-700 hover:text-gray-900 border rounded-lg hover:bg-gray-50 flex items-center gap-1"
