@@ -96,9 +96,21 @@ export async function POST(request: NextRequest) {
         }))
       ];
 
+      console.log('Preparing to send email with:', {
+        to: email,
+        talkTitle: talkPage.title,
+        speakerName: talkPage.speakerName,
+        resourceCount: {
+          gpts: talkPage.customGpts.length,
+          downloads: talkPage.downloads.length,
+          businessLinks: talkPage.businessLinks.length,
+          total: tools.length
+        }
+      });
+
       // Send welcome email with resources
       try {
-        await sendWelcomeEmail({
+        const emailResult = await sendWelcomeEmail({
           to: email,
           recipientName: name || undefined,
           speakerName: talkPage.speakerName,
@@ -107,12 +119,27 @@ export async function POST(request: NextRequest) {
           tools,
           pageUrl: getAbsoluteUrl(`/talk/${talkPage.slug}`)
         });
-        console.log('Welcome email sent successfully to:', email);
-      } catch (emailError) {
-        // Log error but don't fail the request
-        console.error('Failed to send welcome email:', emailError);
+        console.log('Welcome email sent successfully:', {
+          to: email,
+          emailId: emailResult.emailId,
+          talkPage: talkPage.title
+        });
+      } catch (emailError: any) {
+        // Log detailed error information
+        console.error('Failed to send welcome email:', {
+          error: emailError.message || emailError,
+          to: email,
+          talkPageId: talkPage.id,
+          talkTitle: talkPage.title,
+          stack: emailError.stack
+        });
         // You might want to track this failure or retry later
       }
+    } else {
+      console.warn('Talk page not found for email capture:', {
+        talkPageId,
+        email
+      });
     }
 
     return NextResponse.json({ 

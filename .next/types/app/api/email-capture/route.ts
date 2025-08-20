@@ -1,8 +1,8 @@
-// File: /Users/noahcheyer/MicDrop/app/api/test-email/route.ts
-import * as entry from '../../../../../app/api/test-email/route.js'
+// File: /Users/noahcheyer/MicDrop/app/api/email-capture/route.ts
+import * as entry from '../../../../../app/api/email-capture/route.js'
 import type { NextRequest } from 'next/server.js'
 
-type TEntry = typeof import('../../../../../app/api/test-email/route.js')
+type TEntry = typeof import('../../../../../app/api/email-capture/route.js')
 
 // Check that the entry is a valid entry
 checkFields<Diff<{
