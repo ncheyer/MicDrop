@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { sendWelcomeEmail } from '@/lib/resend';
+import { getAbsoluteUrl } from '@/lib/config';
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,8 +57,63 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // TODO: Send welcome email with resources
-    // You can integrate with SendGrid, Resend, or other email services here
+    // Fetch the talk page with all resources to send in email
+    const talkPage = await prisma.talkPage.findUnique({
+      where: { id: talkPageId },
+      include: {
+        customGpts: {
+          orderBy: { order: 'asc' }
+        },
+        downloads: {
+          orderBy: { order: 'asc' }
+        },
+        businessLinks: {
+          orderBy: { order: 'asc' }
+        }
+      }
+    });
+
+    if (talkPage) {
+      // Prepare tools array for email
+      const tools = [
+        ...talkPage.customGpts.map(gpt => ({
+          name: gpt.name,
+          description: gpt.description,
+          url: gpt.url,
+          type: 'gpt' as const
+        })),
+        ...talkPage.downloads.map(download => ({
+          name: download.title,
+          description: download.description || '',
+          url: download.fileUrl,
+          type: 'download' as const
+        })),
+        ...talkPage.businessLinks.map(link => ({
+          name: link.name,
+          description: link.description,
+          url: link.url,
+          type: 'resource' as const
+        }))
+      ];
+
+      // Send welcome email with resources
+      try {
+        await sendWelcomeEmail({
+          to: email,
+          recipientName: name || undefined,
+          speakerName: talkPage.speakerName,
+          speakerEmail: talkPage.speakerEmail || undefined,
+          talkTitle: talkPage.title,
+          tools,
+          pageUrl: getAbsoluteUrl(`/talk/${talkPage.slug}`)
+        });
+        console.log('Welcome email sent successfully to:', email);
+      } catch (emailError) {
+        // Log error but don't fail the request
+        console.error('Failed to send welcome email:', emailError);
+        // You might want to track this failure or retry later
+      }
+    }
 
     return NextResponse.json({ 
       success: true,
