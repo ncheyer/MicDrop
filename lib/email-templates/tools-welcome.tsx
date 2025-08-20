@@ -118,7 +118,7 @@ export function generateHtmlEmail({
         <!-- Powered by -->
         <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e1e4e8;">
           <p style="font-size: 12px; color: #999;">
-            Powered by <a href="https://speakaboutai.us" style="color: #0969da; text-decoration: none;">Speak About AI</a>
+            Powered by <a href="https://speakabout.ai" style="color: #0969da; text-decoration: none;">Speak About AI</a>
           </p>
         </div>
       </div>
@@ -188,7 +188,7 @@ export function generatePlainTextEmail({
   text += `Questions or need help implementing these tools?\n`;
   text += `Feel free to reach out - I'm here to help you succeed with AI!\n\n`;
   text += `Best regards,\n${speakerName}\n\n`;
-  text += `---\nPowered by Speak About AI\nhttps://speakaboutai.us`;
+  text += `---\nPowered by Speak About AI\nhttps://speakabout.ai`;
 
   return text;
 }

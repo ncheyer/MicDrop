@@ -1,26 +1,3 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/auth/signup/route": "app/api/auth/signup/route.js",
-  "/api/analytics/track/route": "app/api/analytics/track/route.js",
-  "/api/auth/login/route": "app/api/auth/login/route.js",
-  "/api/email-capture/route": "app/api/email-capture/route.js",
-  "/api/privacy/email-capture/route": "app/api/privacy/email-capture/route.js",
-  "/api/privacy/consent/route": "app/api/privacy/consent/route.js",
-  "/api/privacy/do-not-sell/route": "app/api/privacy/do-not-sell/route.js",
-  "/api/talk-pages/[id]/publish/route": "app/api/talk-pages/[id]/publish/route.js",
-  "/api/talk-pages/route": "app/api/talk-pages/route.js",
-  "/api/talk-pages/[id]/route": "app/api/talk-pages/[id]/route.js",
-  "/api/user/data-deletion/route": "app/api/user/data-deletion/route.js",
-  "/api/test-email/route": "app/api/test-email/route.js",
-  "/dashboard/analytics/[id]/page": "app/dashboard/analytics/[id]/page.js",
-  "/api/user/data-export/route": "app/api/user/data-export/route.js",
-  "/dashboard/edit/[id]/page": "app/dashboard/edit/[id]/page.js",
-  "/dashboard/create/page": "app/dashboard/create/page.js",
-  "/page": "app/page.js",
-  "/signup/page": "app/signup/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/talk/[slug]/page": "app/talk/[slug]/page.js",
-  "/login/page": "app/login/page.js",
-  "/privacy/page": "app/privacy/page.js",
-  "/api/upload/route": "app/api/upload/route.js"
+  "/api/test-email/route": "app/api/test-email/route.js"
 }

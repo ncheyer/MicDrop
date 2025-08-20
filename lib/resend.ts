@@ -48,9 +48,7 @@ export async function sendWelcomeEmail({
 
     // Send email via Resend
     const { data, error } = await resend.emails.send({
-      from: speakerEmail && speakerEmail.includes('@') 
-        ? `${speakerName} <${speakerEmail}>`
-        : 'Speak About AI <noreply@speakaboutai.us>',
+      from: 'Speak About AI <noreply@speakabout.ai>',
       to: [to],
       subject: `Your AI Implementation Tools from "${talkTitle}"`,
       html: htmlContent,
@@ -74,7 +72,7 @@ export async function sendWelcomeEmail({
 export async function sendTestEmail(to: string) {
   try {
     const { data, error } = await resend.emails.send({
-      from: 'Speak About AI <noreply@speakaboutai.us>',
+      from: 'Speak About AI <noreply@speakabout.ai>',
       to: [to],
       subject: 'Test Email from MicDrop',
       html: '<p>This is a test email from your MicDrop platform.</p>',
