@@ -45,6 +45,7 @@ model TalkPage {
   newsletterEnabled     Boolean @default(false)
   newsletterDescription String?
   newsletterSignupUrl   String?
+  newsletterBannerUrl   String?
   
   // Metadata
   createdAt         DateTime  @default(now())
@@ -130,4 +131,68 @@ model Analytics {
   talkPage    TalkPage  @relation(fields: [talkPageId], references: [id], onDelete: Cascade)
   
   createdAt   DateTime  @default(now())
+}
+
+// Privacy Compliance Models
+
+model ConsentRecord {
+  id          String    @id @default(cuid())
+  userId      String?   // Optional - for logged-in users
+  email       String?   // Optional - for guest users
+  ipAddress   String
+  userAgent   String
+  preferences Json      // ConsentPreferences object
+  timestamp   DateTime
+  version     String    // Privacy policy version
+  source      String    // "banner", "settings", "signup", "api"
+  
+  createdAt   DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([email])
+  @@index([timestamp])
+}
+
+model EmailCaptureConsent {
+  id               String    @id @default(cuid())
+  email            String
+  name             String?
+  marketingConsent Boolean
+  analyticsConsent Boolean
+  source           String    // Source of the capture
+  ipAddress        String
+  timestamp        DateTime
+  
+  createdAt        DateTime  @default(now())
+  
+  @@index([email])
+  @@index([timestamp])
+}
+
+model CcpaOptOut {
+  id          String    @id @default(cuid())
+  ipAddress   String
+  doNotSell   Boolean
+  timestamp   DateTime
+  userAgent   String
+  
+  createdAt   DateTime  @default(now())
+  
+  @@index([ipAddress])
+  @@index([timestamp])
+}
+
+model DataDeletionLog {
+  id           String    @id @default(cuid())
+  email        String
+  userId       String?
+  deletionDate DateTime
+  deletionType String    // "user_request", "automated", "legal"
+  ipAddress    String
+  userAgent    String
+  
+  createdAt    DateTime  @default(now())
+  
+  @@index([email])
+  @@index([deletionDate])
 }

@@ -13,7 +13,8 @@ import {
   Download,
   ExternalLink,
   Calendar,
-  Clock
+  Clock,
+  Sparkles
 } from "lucide-react";
 
 interface Analytics {

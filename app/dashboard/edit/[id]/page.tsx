@@ -39,6 +39,7 @@ export default function EditTalkPage({ params }: { params: { id: string } }) {
     newsletterEnabled: false,
     newsletterDescription: "",
     newsletterSignupUrl: "",
+    newsletterBannerUrl: "",
     published: false,
     customGpts: [],
     downloads: [],
@@ -609,6 +610,28 @@ export default function EditTalkPage({ params }: { params: { id: string } }) {
                         rows={2}
                         className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500"
                       />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Newsletter Banner Image URL
+                      </label>
+                      <input
+                        type="url"
+                        name="newsletterBannerUrl"
+                        value={formData.newsletterBannerUrl}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500"
+                        placeholder="https://... (Upload to Vercel Blob or paste URL)"
+                      />
+                      {formData.newsletterBannerUrl && (
+                        <div className="mt-2">
+                          <img 
+                            src={formData.newsletterBannerUrl} 
+                            alt="Newsletter banner preview" 
+                            className="w-full h-32 object-cover rounded-lg border"
+                          />
+                        </div>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">

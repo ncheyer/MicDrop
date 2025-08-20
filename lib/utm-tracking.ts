@@ -1,7 +1,9 @@
 /**
  * UTM Tracking Utilities
- * Automatically adds UTM parameters to track link performance
+ * Privacy-compliant tracking with user consent
  */
+
+import { hasConsentFor } from './privacy-consent';
 
 interface UTMParams {
   utm_source: string;
@@ -51,7 +53,7 @@ export function generateTalkPageUTM(
 }
 
 /**
- * Track a link click in the database
+ * Track a link click in the database (with consent check)
  */
 export async function trackLinkClick(
   talkPageId: string,
@@ -59,6 +61,12 @@ export async function trackLinkClick(
   linkName: string,
   destinationUrl: string
 ) {
+  // Only track if user has consented to analytics
+  if (!hasConsentFor('analytics')) {
+    console.log('Analytics tracking skipped - no user consent');
+    return;
+  }
+
   try {
     await fetch('/api/analytics/track', {
       method: 'POST',
@@ -70,7 +78,8 @@ export async function trackLinkClick(
           linkType,
           linkName,
           destinationUrl,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          consentGiven: true
         }
       })
     });
@@ -80,9 +89,15 @@ export async function trackLinkClick(
 }
 
 /**
- * Track a page view
+ * Track a page view (with consent check)
  */
 export async function trackPageView(talkPageId: string, referrer?: string) {
+  // Only track if user has consented to analytics
+  if (!hasConsentFor('analytics')) {
+    console.log('Page view tracking skipped - no user consent');
+    return;
+  }
+
   try {
     await fetch('/api/analytics/track', {
       method: 'POST',
@@ -93,7 +108,8 @@ export async function trackPageView(talkPageId: string, referrer?: string) {
         data: {
           referrer,
           timestamp: new Date().toISOString(),
-          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : null
+          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+          consentGiven: true
         }
       })
     });
@@ -103,7 +119,7 @@ export async function trackPageView(talkPageId: string, referrer?: string) {
 }
 
 /**
- * Track email capture
+ * Track email capture (always allowed as it's essential functionality)
  */
 export async function trackEmailCapture(
   talkPageId: string,
@@ -120,11 +136,44 @@ export async function trackEmailCapture(
         data: {
           email,
           captureType,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          consentRequired: false // Email capture is essential functionality
         }
       })
     });
   } catch (error) {
     console.error('Error tracking email capture:', error);
+  }
+}
+
+/**
+ * Enhanced email capture with explicit consent
+ */
+export async function trackEmailCaptureWithConsent(
+  talkPageId: string,
+  email: string,
+  captureType: 'resources' | 'newsletter' | 'consultation',
+  marketingConsent: boolean = false,
+  analyticsConsent: boolean = false
+) {
+  try {
+    // Always track the email capture (essential functionality)
+    await trackEmailCapture(talkPageId, email, captureType);
+
+    // Store detailed consent preferences
+    await fetch('/api/privacy/email-capture', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        talkPageId,
+        email,
+        marketingConsent,
+        analyticsConsent,
+        source: `talk_page_${captureType}`,
+        timestamp: new Date().toISOString()
+      })
+    });
+  } catch (error) {
+    console.error('Error tracking email capture with consent:', error);
   }
 }

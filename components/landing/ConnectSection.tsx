@@ -43,10 +43,12 @@ export default function ConnectSection({
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => onContactClick("linkedin")}
-              className="flex flex-col items-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              className="group flex flex-col items-center p-6 bg-white rounded-xl shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 border border-gray-100 hover:border-[#0077b5]/20"
             >
-              <Linkedin className="h-10 w-10 text-[#0077b5] mb-3" />
-              <span className="font-medium">Connect on LinkedIn</span>
+              <div className="bg-[#0077b5]/10 rounded-full p-3 mb-4 group-hover:bg-[#0077b5]/20 transition-colors">
+                <Linkedin className="h-8 w-8 text-[#0077b5]" />
+              </div>
+              <span className="font-semibold text-gray-800">Connect on LinkedIn</span>
               <span className="text-sm text-gray-500 mt-1">Professional Network</span>
             </a>
           )}
@@ -55,11 +57,13 @@ export default function ConnectSection({
             <a
               href={`mailto:${contactEmail}`}
               onClick={() => onContactClick("email")}
-              className="flex flex-col items-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              className="group flex flex-col items-center p-6 bg-white rounded-xl shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 border border-gray-100 hover:border-primary-200"
             >
-              <Mail className="h-10 w-10 text-primary-600 mb-3" />
-              <span className="font-medium">Direct Email</span>
-              <span className="text-sm text-gray-500 mt-1">{contactEmail}</span>
+              <div className="bg-primary-100 rounded-full p-3 mb-4 group-hover:bg-primary-200 transition-colors">
+                <Mail className="h-8 w-8 text-primary-600" />
+              </div>
+              <span className="font-semibold text-gray-800">Direct Email</span>
+              <span className="text-sm text-gray-500 mt-1 break-all">{contactEmail}</span>
             </a>
           )}
 
@@ -69,10 +73,12 @@ export default function ConnectSection({
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => onContactClick("calendar")}
-              className="flex flex-col items-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              className="group flex flex-col items-center p-6 bg-white rounded-xl shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 border border-gray-100 hover:border-green-200"
             >
-              <Calendar className="h-10 w-10 text-green-600 mb-3" />
-              <span className="font-medium">Book a Consultation</span>
+              <div className="bg-green-100 rounded-full p-3 mb-4 group-hover:bg-green-200 transition-colors">
+                <Calendar className="h-8 w-8 text-green-600" />
+              </div>
+              <span className="font-semibold text-gray-800">Chat With Me!</span>
               <span className="text-sm text-gray-500 mt-1">Schedule Time</span>
             </a>
           )}

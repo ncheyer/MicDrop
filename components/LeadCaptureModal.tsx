@@ -73,7 +73,7 @@ export default function LeadCaptureModal({
               <Gift className="h-6 w-6" />
             </div>
             <h2 className="text-lg font-bold mb-1">
-              Unlock All {gptCount + resourceCount} Resources
+              Get Instant Access to All Resources
             </h2>
             <p className="text-sm text-primary-100">
               From {speakerName}'s talk
@@ -83,26 +83,27 @@ export default function LeadCaptureModal({
 
         {/* Content */}
         <div className="p-5">
-          {/* What you'll get - Compact version */}
+          {/* What you'll get - Detailed version */}
           <div className="mb-4">
-            <div className="flex items-center gap-4 text-sm">
+            <p className="text-sm font-semibold text-gray-800 mb-3">What you'll receive instantly:</p>
+            <div className="space-y-2 text-sm text-gray-600">
               {gptCount > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <Sparkles className="h-4 w-4 text-yellow-500" />
-                  <span className="font-medium">{gptCount} GPTs</span>
+                <div className="flex items-start gap-2">
+                  <Sparkles className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                  <span>Access to all <strong>{gptCount} Custom GPTs</strong> built for this talk</span>
                 </div>
               )}
               
               {resourceCount > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <Zap className="h-4 w-4 text-blue-500" />
-                  <span className="font-medium">{resourceCount} Resources</span>
+                <div className="flex items-start gap-2">
+                  <Zap className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                  <span>The <strong>AI Framework Outline</strong> and resources</span>
                 </div>
               )}
               
-              <div className="flex items-center gap-1.5">
-                <Mail className="h-4 w-4 text-purple-500" />
-                <span className="font-medium">Follow-ups</span>
+              <div className="flex items-start gap-2">
+                <Mail className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
+                <span>My newsletter with <strong>AI updates, future GPTs</strong>, and industry tips</span>
               </div>
             </div>
           </div>

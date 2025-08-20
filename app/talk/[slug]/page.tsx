@@ -37,7 +37,7 @@ export default async function TalkPage({ params }: { params: { slug: string } })
   }
 
   // Check if the current user is the owner of this page
-  const isOwner = userId && talkPage.userId === userId;
+  const isOwner = !!(userId && talkPage.userId === userId);
 
   // Transform data to match client expectations
   const pageData = {
@@ -45,7 +45,7 @@ export default async function TalkPage({ params }: { params: { slug: string } })
     slug: talkPage.slug,
     title: talkPage.title,
     date: talkPage.date,
-    hook: talkPage.hook,
+    hook: talkPage.hook || undefined,
     speaker: {
       name: talkPage.speakerName,
       email: talkPage.speakerEmail,
@@ -77,6 +77,7 @@ export default async function TalkPage({ params }: { params: { slug: string } })
       description: talkPage.newsletterDescription || "",
       signupUrl: talkPage.newsletterSignupUrl || "",
     } : undefined,
+    newsletterBannerUrl: talkPage.newsletterBannerUrl || undefined,
     contactEmail: talkPage.contactEmail || undefined,
     calendarLink: talkPage.calendarLink || undefined,
     isOwner,

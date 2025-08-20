@@ -58,7 +58,7 @@ export default function SignupPage() {
             <div className="md:w-1/2 bg-primary-600 p-8 text-white">
               <h2 className="text-2xl font-bold mb-6">Start Building Your Speaker Hub</h2>
               <p className="mb-8 text-primary-100">
-                Join speakers who are converting more attendees into connections with MicDrop
+                Join speakers who are converting more attendees into connections with MicDrop by Speak About AI
               </p>
               <ul className="space-y-4">
                 {benefits.map((benefit) => (
@@ -70,7 +70,7 @@ export default function SignupPage() {
               </ul>
               <div className="mt-8 p-4 bg-primary-700 rounded-lg">
                 <p className="text-sm text-primary-100">
-                  "MicDrop helped me convert 40% of my talk attendees into newsletter subscribers!"
+                  "MicDrop by Speak About AI helped me convert 40% of my talk attendees into newsletter subscribers!"
                 </p>
                 <p className="text-sm mt-2 font-medium">- Sarah Chen, AI Speaker</p>
               </div>
@@ -80,7 +80,11 @@ export default function SignupPage() {
             <div className="md:w-1/2 p-8">
               <div className="text-center mb-6">
                 <Link href="/" className="inline-flex items-center justify-center mb-4">
-                  <Mic className="h-10 w-10 text-primary-600" />
+                  <img 
+                    src="/favicon.png" 
+                    alt="Speak About AI" 
+                    className="h-12 w-12"
+                  />
                 </Link>
                 <h1 className="text-2xl font-bold text-gray-900">Create Your Account</h1>
                 <p className="text-gray-600 mt-2">Get started in 30 seconds</p>

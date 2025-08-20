@@ -131,8 +131,19 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Mic className="h-8 w-8 text-primary-600" />
-              <span className="ml-2 text-xl font-bold">MicDrop</span>
+              <img 
+                src="/favicon.png" 
+                alt="Speak About AI" 
+                className="h-10 w-10"
+              />
+              <div className="ml-3">
+                <span className="text-xl font-bold bg-speakabout-gradient bg-clip-text text-transparent">
+                  MicDrop
+                </span>
+                <span className="block text-xs text-gray-600 -mt-1">
+                  by Speak About AI
+                </span>
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600">Welcome, {user?.name}</span>

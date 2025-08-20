@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import HeroSection from "@/components/landing/HeroSection";
-import ResourcesSection from "@/components/landing/ResourcesSection";
+import ResourcesAndNewsletterSection from "@/components/landing/ResourcesAndNewsletterSection";
 import AboutSection from "@/components/landing/AboutSection";
 import ConnectSection from "@/components/landing/ConnectSection";
 import LeadCaptureModal from "@/components/LeadCaptureModal";
@@ -51,19 +51,34 @@ export default function TalkPageClient({ initialData }: ClientPageProps) {
   }, [talkData, hasTrackedView]);
 
   const handleGetResources = () => {
-    if (!contentAccess.showAllResources && !initialData.isOwner) {
-      setShowLeadCapture(true);
+    // Scroll to newsletter section to get access to GPTs
+    const newsletterSection = document.getElementById("newsletter");
+    if (newsletterSection) {
+      newsletterSection.scrollIntoView({ behavior: "smooth" });
     } else {
       document.getElementById("resources")?.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   const handleGPTClick = (name: string) => {
+    console.log('GPT clicked:', { 
+      name, 
+      showAllGPTs: contentAccess.showAllGPTs, 
+      isOwner: initialData.isOwner,
+      shouldBlock: !contentAccess.showAllGPTs && !initialData.isOwner
+    });
+    
+    // Require email capture before accessing GPTs
     if (!contentAccess.showAllGPTs && !initialData.isOwner) {
       setShowLeadCapture(true);
       return;
     }
+    // Track and open GPT
     trackLinkClick(talkData.id, "gpt", name, "");
+    const gpt = talkData.customGpts.find(g => g.name === name);
+    if (gpt) {
+      window.open(gpt.url, "_blank");
+    }
   };
 
   const handleDownload = (title: string, requiresEmail: boolean) => {
@@ -75,13 +90,33 @@ export default function TalkPageClient({ initialData }: ClientPageProps) {
   };
 
   const handleBusinessLinkClick = (name: string) => {
-    trackLinkClick(talkData.id, "business", name, "");
+    const businessLink = talkData.businessLinks.find(link => link.name === name);
+    const destinationUrl = businessLink ? businessLink.url : "";
+    trackLinkClick(talkData.id, "business", name, destinationUrl);
   };
 
   const handleNewsletterSignup = async (email: string) => {
     await trackEmailCapture(talkData.id, email, "newsletter");
+    
+    // Save email to database
+    await fetch("/api/email-capture", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        talkPageId: talkData.id,
+        email,
+        name: "",
+        tier: "newsletter",
+      }),
+    });
+    
     markUserAsCaptured(talkData.slug, email);
-    setContentAccess(getContentAccess(talkData.slug));
+    setContentAccess({
+      showAllGPTs: true,
+      showAllResources: true,
+      allowDownloads: true,
+      showFullBio: true
+    });
   };
 
   const handleContactClick = (type: string) => {
@@ -111,9 +146,8 @@ export default function TalkPageClient({ initialData }: ClientPageProps) {
   };
 
   // Filter resources based on access level
-  const visibleGpts = contentAccess.showAllGPTs 
-    ? talkData.customGpts 
-    : talkData.customGpts.slice(0, 1);
+  // Show all GPTs but clicking requires email
+  const visibleGpts = talkData.customGpts;
 
   const visibleDownloads = contentAccess.showAllResources
     ? talkData.downloads
@@ -130,11 +164,15 @@ export default function TalkPageClient({ initialData }: ClientPageProps) {
         onGetResources={handleGetResources}
       />
 
-      <ResourcesSection
+      <ResourcesAndNewsletterSection
         customGpts={visibleGpts}
         downloads={visibleDownloads}
+        newsletterEnabled={talkData.newsletter?.enabled}
+        newsletterDescription={talkData.newsletter?.description}
+        newsletterBannerUrl={talkData.newsletterBannerUrl}
         onGPTClick={handleGPTClick}
         onDownload={handleDownload}
+        onNewsletterSignup={handleNewsletterSignup}
         totalGpts={talkData.customGpts.length}
         totalDownloads={talkData.downloads.length}
         isLocked={!contentAccess.showAllResources && !initialData.isOwner}
@@ -167,14 +205,15 @@ export default function TalkPageClient({ initialData }: ClientPageProps) {
           talkData.speaker.bio ? talkData.speaker.bio.substring(0, 150) + "..." : undefined}
         businessLinks={talkData.businessLinks}
         onBusinessLinkClick={handleBusinessLinkClick}
+        talkSlug={talkData.slug}
       />
 
       <ConnectSection
         linkedinUrl={talkData.speaker.linkedinUrl}
         contactEmail={talkData.contactEmail}
         calendarLink={talkData.calendarLink}
-        newsletterEnabled={talkData.newsletter?.enabled}
-        newsletterDescription={talkData.newsletter?.description}
+        newsletterEnabled={false}
+        newsletterDescription=""
         onNewsletterSignup={handleNewsletterSignup}
         onContactClick={handleContactClick}
       />
@@ -194,7 +233,7 @@ export default function TalkPageClient({ initialData }: ClientPageProps) {
           <p className="text-sm">
             Powered by{" "}
             <a href="/" className="text-primary-400 hover:text-primary-300">
-              MicDrop
+              MicDrop by Speak About AI
             </a>
           </p>
         </div>

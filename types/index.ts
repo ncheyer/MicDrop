@@ -3,6 +3,7 @@ export interface TalkPageData {
   slug: string;
   title: string;
   date: Date;
+  hook?: string;
   speaker: {
     name: string;
     email: string;
@@ -34,6 +35,7 @@ export interface TalkPageData {
     description: string;
     signupUrl: string;
   };
+  newsletterBannerUrl?: string;
   contactEmail?: string;
   calendarLink?: string;
 }
