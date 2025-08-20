@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus, ExternalLink, Eye, Download, Mail, Mic, LogOut, BarChart, Users, Calendar, Trash2, QrCode } from "lucide-react";
 import QRCodeModal from "@/components/QRCodeModal";
+import { getAbsoluteUrl } from "@/lib/config";
 
 interface User {
   id: string;
@@ -429,7 +430,7 @@ export default function DashboardPage() {
             setQrModalOpen(false);
             setQrPage(null);
           }}
-          url={`${window.location.origin}/talk/${qrPage.slug}`}
+          url={getAbsoluteUrl(`/talk/${qrPage.slug}`)}
           title={qrPage.title}
         />
       )}
