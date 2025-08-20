@@ -23,7 +23,7 @@ import {
 import { Lock } from "lucide-react";
 
 interface ClientPageProps {
-  initialData: TalkPageData & { id: string; isOwner?: boolean };
+  initialData: TalkPageData & { id: string; isOwner?: boolean; published?: boolean };
 }
 
 export default function TalkPageClient({ initialData }: ClientPageProps) {
@@ -38,10 +38,11 @@ export default function TalkPageClient({ initialData }: ClientPageProps) {
   const [hasTrackedView, setHasTrackedView] = useState(false);
   const scrollCheckInterval = useRef<NodeJS.Timeout>();
   const timeInterval = useRef<NodeJS.Timeout>();
+  const isPreviewMode = !talkData.published;
 
   useEffect(() => {
-    // Track page view
-    if (!hasTrackedView && talkData.id) {
+    // Track page view only if published (don't count preview views)
+    if (!hasTrackedView && talkData.id && talkData.published) {
       trackPageView(talkData.id, document.referrer);
       setHasTrackedView(true);
     }
@@ -155,6 +156,30 @@ export default function TalkPageClient({ initialData }: ClientPageProps) {
 
   return (
     <div className="min-h-screen">
+      {/* Preview Mode Banner */}
+      {isPreviewMode && (
+        <div className="bg-yellow-100 border-b border-yellow-300">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Lock className="h-4 w-4 text-yellow-700" />
+                <span className="text-sm font-medium text-yellow-900">
+                  Preview Mode - This page is not published and views are not tracked
+                </span>
+              </div>
+              {initialData.isOwner && (
+                <a
+                  href={`/dashboard/talk/${talkData.slug}/edit`}
+                  className="text-sm font-medium text-yellow-700 hover:text-yellow-900 underline"
+                >
+                  Edit Page
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      
       <HeroSection
         title={talkData.title}
         date={talkData.date.toISOString()}

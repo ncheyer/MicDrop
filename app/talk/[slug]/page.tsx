@@ -45,6 +45,7 @@ export default async function TalkPage({ params }: { params: { slug: string } })
     slug: talkPage.slug,
     title: talkPage.title,
     date: talkPage.date,
+    published: talkPage.published,
     hook: talkPage.hook || undefined,
     speaker: {
       name: talkPage.speakerName,

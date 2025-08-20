@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, ExternalLink, Eye, Download, Mail, Mic, LogOut, BarChart, Users, Calendar, Trash2 } from "lucide-react";
+import { Plus, ExternalLink, Eye, Download, Mail, Mic, LogOut, BarChart, Users, Calendar, Trash2, QrCode } from "lucide-react";
+import QRCodeModal from "@/components/QRCodeModal";
 
 interface User {
   id: string;
@@ -29,6 +30,9 @@ export default function DashboardPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [pageToDelete, setPageToDelete] = useState<TalkPageSummary | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [qrPage, setQrPage] = useState<TalkPageSummary | null>(null);
+  const [publishing, setPublishing] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if user is logged in
@@ -110,6 +114,31 @@ export default function DashboardPage() {
   const handleDeleteCancel = () => {
     setDeleteModalOpen(false);
     setPageToDelete(null);
+  };
+
+  const handleTogglePublish = async (page: TalkPageSummary) => {
+    setPublishing(page.id);
+    try {
+      const response = await fetch(`/api/talk-pages/${page.id}/publish`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ published: !page.published }),
+      });
+      
+      if (response.ok) {
+        // Update the page in the list
+        setTalkPages(talkPages.map(p => 
+          p.id === page.id ? { ...p, published: !p.published } : p
+        ));
+      } else {
+        alert("Failed to update publish status. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error toggling publish status:", error);
+      alert("An error occurred while updating the publish status.");
+    } finally {
+      setPublishing(null);
+    }
   };
 
   if (loading) {
@@ -261,6 +290,36 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleTogglePublish(page)}
+                        disabled={publishing === page.id}
+                        className={`px-3 py-1.5 text-sm rounded-lg flex items-center gap-1 transition-colors ${
+                          page.published
+                            ? "text-yellow-700 border border-yellow-600 hover:bg-yellow-50"
+                            : "text-green-700 border border-green-600 hover:bg-green-50"
+                        } ${publishing === page.id ? "opacity-50 cursor-not-allowed" : ""}`}
+                        title={page.published ? "Unpublish page" : "Publish page"}
+                      >
+                        {publishing === page.id ? (
+                          <span className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
+                        ) : (
+                          <Eye className="h-3 w-3" />
+                        )}
+                        {page.published ? "Unpublish" : "Publish"}
+                      </button>
+                      {page.published && (
+                        <button
+                          onClick={() => {
+                            setQrPage(page);
+                            setQrModalOpen(true);
+                          }}
+                          className="px-3 py-1.5 text-sm text-gray-700 hover:text-gray-900 border rounded-lg hover:bg-gray-50 flex items-center gap-1"
+                          title="Show QR Code"
+                        >
+                          <QrCode className="h-3 w-3" />
+                          QR Code
+                        </button>
+                      )}
                       <Link
                         href={`/talk/${page.slug}`}
                         target="_blank"
@@ -350,6 +409,19 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* QR Code Modal */}
+      {qrModalOpen && qrPage && (
+        <QRCodeModal
+          isOpen={qrModalOpen}
+          onClose={() => {
+            setQrModalOpen(false);
+            setQrPage(null);
+          }}
+          url={`${window.location.origin}/talk/${qrPage.slug}`}
+          title={qrPage.title}
+        />
       )}
     </div>
   );
