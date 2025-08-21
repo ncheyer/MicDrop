@@ -232,7 +232,7 @@ export default function CreateTalkPage() {
                   onChange={handleChange}
                   rows={2}
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  placeholder="Transform your event operations with AI tools that save 10+ hours weekly..."
+                  placeholder="Transform your event operations with AI tools that save 10+ hours monthly..."
                 />
               </div>
             </div>
