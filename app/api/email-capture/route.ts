@@ -15,63 +15,82 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if email already exists for this talk page
-    const existingCapture = await prisma.emailCapture.findUnique({
-      where: {
-        email_talkPageId: {
-          email,
-          talkPageId
-        }
-      }
-    });
+    // First, try to fetch the talk page to send email (this is most important)
+    let talkPage = null;
+    let emailCaptureSuccess = false;
+    let isNewCapture = false;
 
-    if (existingCapture) {
-      // Email already captured, just return success
-      return NextResponse.json({ 
-        success: true, 
-        message: 'Email already captured',
-        isNew: false 
+    try {
+      // Fetch the talk page with all resources to send in email
+      talkPage = await prisma.talkPage.findUnique({
+        where: { id: talkPageId },
+        include: {
+          customGpts: {
+            orderBy: { order: 'asc' }
+          },
+          downloads: {
+            orderBy: { order: 'asc' }
+          },
+          businessLinks: {
+            orderBy: { order: 'asc' }
+          }
+        }
       });
+    } catch (fetchError) {
+      console.error('Error fetching talk page:', fetchError);
     }
 
-    // Create new email capture
-    const emailCapture = await prisma.emailCapture.create({
-      data: {
+    // Try to save email capture to database (but don't let this block email sending)
+    try {
+      // Check if email already exists for this talk page
+      const existingCapture = await prisma.emailCapture.findUnique({
+        where: {
+          email_talkPageId: {
+            email,
+            talkPageId
+          }
+        }
+      });
+
+      if (!existingCapture) {
+        // Create new email capture
+        const emailCapture = await prisma.emailCapture.create({
+          data: {
+            email,
+            name,
+            tier,
+            talkPageId
+          }
+        });
+        emailCaptureSuccess = true;
+        isNewCapture = true;
+
+        // Also track in analytics (non-blocking)
+        prisma.analytics.create({
+          data: {
+            event: 'email_capture',
+            talkPageId,
+            data: {
+              email,
+              tier,
+              timestamp: new Date().toISOString()
+            }
+          }
+        }).catch(err => console.error('Analytics tracking error:', err));
+      } else {
+        console.log('Email already captured for this talk page:', email);
+        emailCaptureSuccess = true;
+        isNewCapture = false;
+      }
+    } catch (dbError: any) {
+      console.error('Database error capturing email:', {
+        error: dbError.message,
+        code: dbError.code,
         email,
-        name,
-        tier,
         talkPageId
-      }
-    });
-
-    // Also track in analytics
-    await prisma.analytics.create({
-      data: {
-        event: 'email_capture',
-        talkPageId,
-        data: {
-          email,
-          tier,
-          timestamp: new Date().toISOString()
-        }
-      }
-    });
-
-    // Fetch the talk page with all resources to send in email
-    const talkPage = await prisma.talkPage.findUnique({
-      where: { id: talkPageId },
-      include: {
-        customGpts: {
-          orderBy: { order: 'asc' }
-        },
-        downloads: {
-          orderBy: { order: 'asc' }
-        },
-        businessLinks: {
-          orderBy: { order: 'asc' }
-        }
-      }
-    });
+      });
+      // Continue to try sending email even if database fails
+    }
 
     if (talkPage) {
       // Prepare tools array for email

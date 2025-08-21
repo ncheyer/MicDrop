@@ -46,9 +46,21 @@ export async function sendWelcomeEmail({
       pageUrl
     });
 
+    // Determine the from address based on environment
+    // In production, use a verified domain if available, otherwise fallback to Resend's domain
+    const fromAddress = process.env.RESEND_FROM_EMAIL || 
+                       (process.env.NODE_ENV === 'production' 
+                         ? 'MicDrop <onboarding@resend.dev>' 
+                         : 'Speak About AI <noreply@speakabout.ai>');
+
+    console.log(`[Resend] Sending welcome email to: ${to}`);
+    console.log(`[Resend] From address: ${fromAddress}`);
+    console.log(`[Resend] Subject: Your AI Implementation Tools from "${talkTitle}"`);
+    console.log(`[Resend] Tools count: ${tools.length}`);
+
     // Send email via Resend
     const { data, error } = await resend.emails.send({
-      from: 'Speak About AI <noreply@speakabout.ai>',
+      from: fromAddress,
       to: [to],
       subject: `Your AI Implementation Tools from "${talkTitle}"`,
       html: htmlContent,
@@ -57,13 +69,40 @@ export async function sendWelcomeEmail({
     });
 
     if (error) {
-      console.error('Resend error:', error);
+      console.error('[Resend] Error details:', {
+        error,
+        to,
+        fromAddress,
+        talkTitle
+      });
+      
+      // If the error is about the from domain, try with fallback
+      if (error.message?.includes('domain') && !fromAddress.includes('resend.dev')) {
+        console.log('[Resend] Retrying with fallback domain...');
+        const fallbackResult = await resend.emails.send({
+          from: 'MicDrop <onboarding@resend.dev>',
+          to: [to],
+          subject: `Your AI Implementation Tools from "${talkTitle}"`,
+          html: htmlContent,
+          text: textContent,
+          replyTo: speakerEmail || undefined,
+        });
+        
+        if (fallbackResult.error) {
+          throw new Error(`Failed to send email even with fallback: ${fallbackResult.error.message}`);
+        }
+        
+        console.log('[Resend] Email sent successfully with fallback domain');
+        return { success: true, emailId: fallbackResult.data?.id };
+      }
+      
       throw new Error(`Failed to send email: ${error.message}`);
     }
 
+    console.log(`[Resend] Email sent successfully! ID: ${data?.id}`);
     return { success: true, emailId: data?.id };
   } catch (error) {
-    console.error('Error sending welcome email:', error);
+    console.error('[Resend] Critical error sending welcome email:', error);
     throw error;
   }
 }
@@ -71,8 +110,13 @@ export async function sendWelcomeEmail({
 // Send a simple notification email (for testing)
 export async function sendTestEmail(to: string) {
   try {
+    const fromAddress = process.env.RESEND_FROM_EMAIL || 
+                       (process.env.NODE_ENV === 'production' 
+                         ? 'MicDrop <onboarding@resend.dev>' 
+                         : 'Speak About AI <noreply@speakabout.ai>');
+
     const { data, error } = await resend.emails.send({
-      from: 'Speak About AI <noreply@speakabout.ai>',
+      from: fromAddress,
       to: [to],
       subject: 'Test Email from MicDrop',
       html: '<p>This is a test email from your MicDrop platform.</p>',
@@ -81,6 +125,24 @@ export async function sendTestEmail(to: string) {
 
     if (error) {
       console.error('Resend error:', error);
+      
+      // Try fallback if needed
+      if (error.message?.includes('domain') && !fromAddress.includes('resend.dev')) {
+        const fallbackResult = await resend.emails.send({
+          from: 'MicDrop <onboarding@resend.dev>',
+          to: [to],
+          subject: 'Test Email from MicDrop',
+          html: '<p>This is a test email from your MicDrop platform.</p>',
+          text: 'This is a test email from your MicDrop platform.',
+        });
+        
+        if (fallbackResult.error) {
+          throw new Error(`Failed to send test email even with fallback: ${fallbackResult.error.message}`);
+        }
+        
+        return { success: true, emailId: fallbackResult.data?.id };
+      }
+      
       throw new Error(`Failed to send test email: ${error.message}`);
     }
 
