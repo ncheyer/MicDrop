@@ -43,4 +43,8 @@ temp/
 # Package manager locks (uncomment as needed)
 # package-lock.json
 # yarn.lock
-# pnpm-lock.yaml.next/
+# pnpm-lock.yaml
+
+# Next.js
+.next/
+tsconfig.tsbuildinfo
