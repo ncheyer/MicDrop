@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, ExternalLink, Eye, Download, Mail, Mic, LogOut, BarChart, Users, Calendar, Trash2, QrCode } from "lucide-react";
+import { Plus, ExternalLink, Eye, Download, Mail, Mic, LogOut, BarChart, Users, Calendar, Trash2, QrCode, Globe, FileText } from "lucide-react";
 import QRCodeModal from "@/components/QRCodeModal";
 import { getAbsoluteUrl } from "@/lib/config";
 
@@ -190,6 +190,23 @@ export default function DashboardPage() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Navigation Tabs */}
+        <div className="flex gap-4 mb-8 border-b border-gray-200">
+          <button
+            className="flex items-center gap-2 px-4 py-2 border-b-2 border-primary-600 text-primary-600 font-medium"
+          >
+            <Mic className="h-5 w-5" />
+            Talk Pages
+          </button>
+          <Link
+            href="/dashboard/landing-pages"
+            className="flex items-center gap-2 px-4 py-2 border-b-2 border-transparent text-gray-600 hover:text-gray-900 font-medium"
+          >
+            <Globe className="h-5 w-5" />
+            Landing Pages
+          </Link>
+        </div>
+
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg p-6 shadow-sm">

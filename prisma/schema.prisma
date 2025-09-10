@@ -16,6 +16,7 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   talkPages     TalkPage[]
+  landingPages  LandingPage[]
 }
 
 model TalkPage {
@@ -59,6 +60,7 @@ model TalkPage {
   businessLinks     BusinessLink[]
   emailCaptures     EmailCapture[]
   analytics         Analytics[]
+  landingPage       LandingPage?
 }
 
 model CustomGPT {
@@ -195,4 +197,93 @@ model DataDeletionLog {
   
   @@index([email])
   @@index([deletionDate])
+}
+
+// Landing Page Models
+
+model LandingPage {
+  id               String    @id @default(cuid())
+  slug             String    @unique
+  title            String
+  description      String?
+  type             String    @default("general") // "general", "talk", "product", "event"
+  published        Boolean   @default(false)
+  
+  // SEO
+  metaTitle        String?
+  metaDescription  String?
+  metaKeywords     String?
+  ogImage          String?
+  
+  // Content Sections
+  sections         LandingPageSection[]
+  
+  // Talk-specific fields (optional)
+  talkPageId       String?   @unique
+  talkPage         TalkPage? @relation(fields: [talkPageId], references: [id], onDelete: SetNull)
+  
+  // Analytics
+  viewCount        Int       @default(0)
+  conversionCount  Int       @default(0)
+  
+  // Ownership
+  userId           String
+  user             User      @relation(fields: [userId], references: [id])
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  @@index([slug])
+  @@index([type])
+  @@index([published])
+}
+
+model LandingPageSection {
+  id               String    @id @default(cuid())
+  landingPageId    String
+  landingPage      LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+  
+  type             String    // "hero", "features", "cta", "testimonials", "faq", "custom"
+  order            Int       @default(0)
+  
+  // Content
+  title            String?
+  subtitle         String?
+  content          Json?     // Flexible JSON for different section types
+  
+  // Media
+  backgroundImage  String?
+  backgroundColor  String?
+  videoUrl         String?
+  
+  // Settings
+  visible          Boolean   @default(true)
+  customCss        String?
+  customHtml       String?
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  @@index([landingPageId])
+  @@index([order])
+}
+
+model LandingPageTemplate {
+  id               String    @id @default(cuid())
+  name             String
+  description      String?
+  type             String    // "general", "talk", "product", "event"
+  thumbnail        String?
+  
+  // Template content
+  sections         Json      // Pre-defined sections structure
+  defaultSettings  Json?     // Default colors, fonts, etc.
+  
+  // Usage tracking
+  usageCount       Int       @default(0)
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  @@index([type])
 }

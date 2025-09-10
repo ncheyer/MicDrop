@@ -48,3 +48,6 @@ temp/
 # Next.js
 .next/
 tsconfig.tsbuildinfo
+
+# Subdirectories
+speak-about-ai-website/
