@@ -15,7 +15,8 @@ import {
   Calendar,
   Globe,
   Search,
-  Filter
+  Filter,
+  ArrowLeft
 } from 'lucide-react';
 
 interface LandingPage {
@@ -43,10 +44,29 @@ export default function LandingPagesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateMenu, setShowCreateMenu] = useState(false);
 
   useEffect(() => {
     fetchLandingPages();
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.create-menu-container')) {
+        setShowCreateMenu(false);
+      }
+    };
+
+    if (showCreateMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showCreateMenu]);
 
   const fetchLandingPages = async () => {
     try {
@@ -138,6 +158,23 @@ export default function LandingPagesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Navigation Tabs */}
+        <div className="flex gap-4 mb-8 border-b border-gray-200">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 px-4 py-2 border-b-2 border-transparent text-gray-600 hover:text-gray-900 font-medium"
+          >
+            <Mic className="h-5 w-5" />
+            Talk Pages
+          </Link>
+          <button
+            className="flex items-center gap-2 px-4 py-2 border-b-2 border-primary-600 text-primary-600 font-medium"
+          >
+            <Globe className="h-5 w-5" />
+            Landing Pages
+          </button>
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Landing Pages</h1>
@@ -171,12 +208,41 @@ export default function LandingPagesPage() {
                 <option value="event">Event</option>
                 <option value="product">Product</option>
               </select>
-              <Link href="/dashboard/landing-pages/create">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+              <div className="relative create-menu-container">
+                <button 
+                  onClick={() => setShowCreateMenu(!showCreateMenu)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                >
                   <Plus className="h-5 w-5" />
                   Create New
                 </button>
-              </Link>
+                {showCreateMenu && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                    <Link
+                      href="/dashboard/create"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 border-b border-gray-100"
+                      onClick={() => setShowCreateMenu(false)}
+                    >
+                      <Mic className="h-5 w-5 text-purple-600" />
+                      <div>
+                        <div className="font-medium">Talk Page</div>
+                        <div className="text-xs text-gray-500">For speaking engagements</div>
+                      </div>
+                    </Link>
+                    <Link
+                      href="/dashboard/landing-pages/create"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50"
+                      onClick={() => setShowCreateMenu(false)}
+                    >
+                      <Globe className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <div className="font-medium">Landing Page</div>
+                        <div className="text-xs text-gray-500">Marketing & promotions</div>
+                      </div>
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -192,12 +258,41 @@ export default function LandingPagesPage() {
             <Globe className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No landing pages yet</h3>
             <p className="text-gray-600 mb-6">Create your first landing page to get started</p>
-            <Link href="/dashboard/landing-pages/create">
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 inline-flex items-center gap-2">
+            <div className="relative create-menu-container inline-block">
+              <button 
+                onClick={() => setShowCreateMenu(!showCreateMenu)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 inline-flex items-center gap-2"
+              >
                 <Plus className="h-5 w-5" />
-                Create Landing Page
+                Create New
               </button>
-            </Link>
+              {showCreateMenu && (
+                <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                  <Link
+                    href="/dashboard/create"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 border-b border-gray-100"
+                    onClick={() => setShowCreateMenu(false)}
+                  >
+                    <Mic className="h-5 w-5 text-purple-600" />
+                    <div>
+                      <div className="font-medium">Talk Page</div>
+                      <div className="text-xs text-gray-500">For speaking engagements</div>
+                    </div>
+                  </Link>
+                  <Link
+                    href="/dashboard/landing-pages/create"
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50"
+                    onClick={() => setShowCreateMenu(false)}
+                  >
+                    <Globe className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <div className="font-medium">Landing Page</div>
+                      <div className="text-xs text-gray-500">Marketing & promotions</div>
+                    </div>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

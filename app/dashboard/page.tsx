@@ -34,6 +34,7 @@ export default function DashboardPage() {
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [qrPage, setQrPage] = useState<TalkPageSummary | null>(null);
   const [publishing, setPublishing] = useState<string | null>(null);
+  const [showCreateMenu, setShowCreateMenu] = useState(false);
 
   useEffect(() => {
     // Check if user is logged in
@@ -49,6 +50,24 @@ export default function DashboardPage() {
     // Load talk pages from database
     fetchTalkPages();
   }, [router]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.create-menu-container')) {
+        setShowCreateMenu(false);
+      }
+    };
+
+    if (showCreateMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showCreateMenu]);
 
   const fetchTalkPages = async () => {
     try {
@@ -250,13 +269,41 @@ export default function DashboardPage() {
         {/* Page Header */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Your Talk Pages</h1>
-          <Link
-            href="/dashboard/create"
-            className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Create New Page
-          </Link>
+          <div className="relative create-menu-container">
+            <button
+              onClick={() => setShowCreateMenu(!showCreateMenu)}
+              className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Create New
+            </button>
+            {showCreateMenu && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                <Link
+                  href="/dashboard/create"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 border-b border-gray-100"
+                  onClick={() => setShowCreateMenu(false)}
+                >
+                  <Mic className="h-5 w-5 text-purple-600" />
+                  <div>
+                    <div className="font-medium">Talk Page</div>
+                    <div className="text-xs text-gray-500">For speaking engagements</div>
+                  </div>
+                </Link>
+                <Link
+                  href="/dashboard/landing-pages/create"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50"
+                  onClick={() => setShowCreateMenu(false)}
+                >
+                  <Globe className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <div className="font-medium">Landing Page</div>
+                    <div className="text-xs text-gray-500">Marketing & promotions</div>
+                  </div>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Talk Pages List */}
