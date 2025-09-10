@@ -25,11 +25,21 @@ interface LandingPageData {
   description?: string | null | undefined;
   type: string;
   sections: Section[];
+  customGpts?: GPT[];
   talkPage?: any;
   user?: {
     name?: string | null;
     email?: string;
   };
+}
+
+interface GPT {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+  clickCount: number;
+  order: number;
 }
 
 interface Section {
@@ -63,6 +73,8 @@ export default function LandingPageRenderer({ data }: { data: LandingPageData })
         return renderHeroSection(section);
       case 'features':
         return renderFeaturesSection(section);
+      case 'gpts':
+        return renderGPTsSection(section);
       case 'cta':
         return renderCTASection(section);
       case 'testimonials':
@@ -147,6 +159,54 @@ export default function LandingPageRenderer({ data }: { data: LandingPageData })
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+    );
+  };
+
+  const renderGPTsSection = (section: Section) => {
+    const gpts = data.customGpts || [];
+    
+    if (gpts.length === 0) return null;
+
+    return (
+      <section className="py-20 px-4" style={{ backgroundColor: section.backgroundColor as any || '#ffffff' }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4 text-gray-900">
+              {section.title || 'AI Tools & GPTs'}
+            </h2>
+            <p className="text-xl text-gray-600">
+              {section.subtitle || 'Explore our custom AI assistants'}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {gpts.map((gpt) => (
+              <a
+                key={gpt.id}
+                href={gpt.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="p-3 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                    <ExternalLink className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-gray-900 group-hover:text-blue-600 transition-colors">
+                  {gpt.name}
+                </h3>
+                <p className="text-sm text-gray-600 line-clamp-3">
+                  {gpt.description}
+                </p>
+                <div className="mt-4 text-sm text-blue-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  Try it now →
+                </div>
+              </a>
+            ))}
           </div>
         </div>
       </section>

@@ -14,6 +14,9 @@ export async function GET(
         sections: {
           orderBy: { order: 'asc' }
         },
+        customGpts: {
+          orderBy: { order: 'asc' }
+        },
         talkPage: true,
         user: {
           select: {
@@ -121,6 +124,9 @@ export async function PUT(
       },
       include: {
         sections: {
+          orderBy: { order: 'asc' }
+        },
+        customGpts: {
           orderBy: { order: 'asc' }
         },
         talkPage: true

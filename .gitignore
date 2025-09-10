@@ -50,4 +50,5 @@ temp/
 tsconfig.tsbuildinfo
 
 # Subdirectories
+.speak-about-ai-website/
 speak-about-ai-website/

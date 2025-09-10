@@ -218,6 +218,9 @@ model LandingPage {
   // Content Sections
   sections         LandingPageSection[]
   
+  // GPT Links
+  customGpts       LandingPageGPT[]
+  
   // Talk-specific fields (optional)
   talkPageId       String?   @unique
   talkPage         TalkPage? @relation(fields: [talkPageId], references: [id], onDelete: SetNull)
@@ -286,4 +289,21 @@ model LandingPageTemplate {
   updatedAt        DateTime  @updatedAt
   
   @@index([type])
+}
+
+model LandingPageGPT {
+  id               String    @id @default(cuid())
+  name             String
+  description      String
+  url              String
+  clickCount       Int       @default(0)
+  order            Int       @default(0)
+  
+  landingPageId    String
+  landingPage      LandingPage @relation(fields: [landingPageId], references: [id], onDelete: Cascade)
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  @@index([landingPageId])
 }

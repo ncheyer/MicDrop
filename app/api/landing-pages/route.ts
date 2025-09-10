@@ -73,7 +73,9 @@ export async function POST(request: NextRequest) {
       metaDescription,
       metaKeywords,
       talkPageId,
-      templateId
+      templateId,
+      customGpts = [],
+      sections: incomingSections
     } = body;
 
     // Check if slug is already taken
@@ -89,8 +91,8 @@ export async function POST(request: NextRequest) {
     }
 
     // If a template is specified, fetch it
-    let sections = [];
-    if (templateId) {
+    let sections = incomingSections || [];
+    if (templateId && !incomingSections) {
       const template = await prisma.landingPageTemplate.findUnique({
         where: { id: templateId }
       });
@@ -121,18 +123,29 @@ export async function POST(request: NextRequest) {
         sections: {
           create: sections.map((section: any, index: number) => ({
             type: section.type,
-            order: index,
+            order: section.order ?? index,
             title: section.title,
             subtitle: section.subtitle,
             content: section.content,
             backgroundImage: section.backgroundImage,
             backgroundColor: section.backgroundColor,
-            visible: true
+            visible: section.visible ?? true
+          }))
+        },
+        customGpts: {
+          create: customGpts.map((gpt: any, index: number) => ({
+            name: gpt.name,
+            description: gpt.description,
+            url: gpt.url,
+            order: gpt.order ?? index
           }))
         }
       },
       include: {
         sections: {
+          orderBy: { order: 'asc' }
+        },
+        customGpts: {
           orderBy: { order: 'asc' }
         },
         talkPage: true

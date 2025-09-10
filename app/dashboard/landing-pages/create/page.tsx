@@ -16,7 +16,8 @@ import {
   Layout,
   Zap,
   MessageSquare,
-  HelpCircle
+  HelpCircle,
+  Bot
 } from 'lucide-react';
 
 interface Section {
@@ -34,6 +35,7 @@ interface Section {
 const SECTION_TYPES = [
   { id: 'hero', name: 'Hero Section', icon: Layout, description: 'Eye-catching header with CTA' },
   { id: 'features', name: 'Features', icon: Zap, description: 'Highlight key features' },
+  { id: 'gpts', name: 'GPTs & AI Tools', icon: Bot, description: 'Showcase AI assistants' },
   { id: 'cta', name: 'Call to Action', icon: MessageSquare, description: 'Drive conversions' },
   { id: 'testimonials', name: 'Testimonials', icon: MessageSquare, description: 'Social proof' },
   { id: 'faq', name: 'FAQ', icon: HelpCircle, description: 'Answer common questions' },
@@ -53,6 +55,7 @@ export default function CreateLandingPage() {
   const [metaTitle, setMetaTitle] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
   const [sections, setSections] = useState<Section[]>([]);
+  const [customGpts, setCustomGpts] = useState<Array<{name: string; description: string; url: string}>>([]);
   
   // Talk pages for linking
   const [talkPages, setTalkPages] = useState<any[]>([]);
@@ -135,6 +138,10 @@ export default function CreateLandingPage() {
             { question: 'How does it work?', answer: 'It works great!' }
           ]
         };
+      case 'gpts':
+        return {
+          showGpts: true
+        };
       default:
         return {};
     }
@@ -189,7 +196,8 @@ export default function CreateLandingPage() {
           metaTitle: metaTitle || title,
           metaDescription: metaDescription || description,
           talkPageId: selectedTalkPageId || undefined,
-          sections
+          sections,
+          customGpts
         })
       });
 
@@ -452,6 +460,71 @@ export default function CreateLandingPage() {
                     placeholder={description || 'Page description'}
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* GPT Management */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Bot className="h-5 w-5" />
+                GPT Links
+              </h3>
+              <div className="space-y-3">
+                {customGpts.map((gpt, index) => (
+                  <div key={index} className="p-3 border border-gray-200 rounded-lg">
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        value={gpt.name}
+                        onChange={(e) => {
+                          const newGpts = [...customGpts];
+                          newGpts[index].name = e.target.value;
+                          setCustomGpts(newGpts);
+                        }}
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                        placeholder="GPT Name"
+                      />
+                      <input
+                        type="text"
+                        value={gpt.description}
+                        onChange={(e) => {
+                          const newGpts = [...customGpts];
+                          newGpts[index].description = e.target.value;
+                          setCustomGpts(newGpts);
+                        }}
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                        placeholder="Description"
+                      />
+                      <input
+                        type="url"
+                        value={gpt.url}
+                        onChange={(e) => {
+                          const newGpts = [...customGpts];
+                          newGpts[index].url = e.target.value;
+                          setCustomGpts(newGpts);
+                        }}
+                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                        placeholder="https://chat.openai.com/g/..."
+                      />
+                      <button
+                        onClick={() => {
+                          setCustomGpts(customGpts.filter((_, i) => i !== index));
+                        }}
+                        className="text-red-600 text-sm hover:underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  onClick={() => {
+                    setCustomGpts([...customGpts, { name: '', description: '', url: '' }]);
+                  }}
+                  className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-gray-400"
+                >
+                  + Add GPT Link
+                </button>
               </div>
             </div>
           </div>

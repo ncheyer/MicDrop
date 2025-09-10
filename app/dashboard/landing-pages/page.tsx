@@ -23,7 +23,7 @@ interface LandingPage {
   id: string;
   slug: string;
   title: string;
-  description?: string;
+  description?: string | null;
   type: string;
   published: boolean;
   viewCount: number;
@@ -34,7 +34,7 @@ interface LandingPage {
     id: string;
     title: string;
     speakerName: string;
-  };
+  } | null;
 }
 
 export default function LandingPagesPage() {

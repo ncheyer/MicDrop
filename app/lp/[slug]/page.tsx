@@ -19,6 +19,9 @@ async function getLandingPage(slug: string) {
           where: { visible: true },
           orderBy: { order: 'asc' }
         },
+        customGpts: {
+          orderBy: { order: 'asc' }
+        },
         talkPage: {
           include: {
             customGpts: true,
