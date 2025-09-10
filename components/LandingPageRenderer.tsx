@@ -22,12 +22,12 @@ import {
 interface LandingPageData {
   id: string;
   title: string;
-  description?: string;
+  description?: string | null | undefined;
   type: string;
   sections: Section[];
   talkPage?: any;
   user?: {
-    name?: string;
+    name?: string | null;
     email?: string;
   };
 }
@@ -35,14 +35,14 @@ interface LandingPageData {
 interface Section {
   id: string;
   type: string;
-  title?: string;
-  subtitle?: string;
+  title?: string | null;
+  subtitle?: string | null;
   content?: any;
-  backgroundImage?: string;
-  backgroundColor?: string;
-  videoUrl?: string;
-  customCss?: string;
-  customHtml?: string;
+  backgroundImage?: string | null;
+  backgroundColor?: string | null;
+  videoUrl?: string | null;
+  customCss?: string | null;
+  customHtml?: string | null;
 }
 
 export default function LandingPageRenderer({ data }: { data: LandingPageData }) {
@@ -86,7 +86,7 @@ export default function LandingPageRenderer({ data }: { data: LandingPageData })
           backgroundImage: section.backgroundImage ? `url(${section.backgroundImage})` : undefined,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
-        }}
+        } as React.CSSProperties}
       >
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 text-gray-900">
@@ -126,7 +126,7 @@ export default function LandingPageRenderer({ data }: { data: LandingPageData })
     const icons = [Zap, Shield, Award];
 
     return (
-      <section className="py-20 px-4" style={{ backgroundColor: section.backgroundColor || '#f9fafb' }}>
+      <section className="py-20 px-4" style={{ backgroundColor: section.backgroundColor as any || '#f9fafb' }}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4 text-gray-900">
@@ -164,7 +164,7 @@ export default function LandingPageRenderer({ data }: { data: LandingPageData })
           backgroundImage: section.backgroundImage ? `url(${section.backgroundImage})` : undefined,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
-        }}
+        } as React.CSSProperties}
       >
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold mb-6 text-white">
@@ -216,7 +216,7 @@ export default function LandingPageRenderer({ data }: { data: LandingPageData })
     const testimonials = content.testimonials || [];
 
     return (
-      <section className="py-20 px-4" style={{ backgroundColor: section.backgroundColor || '#ffffff' }}>
+      <section className="py-20 px-4" style={{ backgroundColor: section.backgroundColor as any || '#ffffff' }}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4 text-gray-900">
@@ -253,7 +253,7 @@ export default function LandingPageRenderer({ data }: { data: LandingPageData })
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
     return (
-      <section className="py-20 px-4" style={{ backgroundColor: section.backgroundColor || '#f9fafb' }}>
+      <section className="py-20 px-4" style={{ backgroundColor: section.backgroundColor as any || '#f9fafb' }}>
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4 text-gray-900">
@@ -295,7 +295,7 @@ export default function LandingPageRenderer({ data }: { data: LandingPageData })
       return (
         <section
           style={{
-            backgroundColor: section.backgroundColor,
+            backgroundColor: section.backgroundColor as any,
             backgroundImage: section.backgroundImage ? `url(${section.backgroundImage})` : undefined
           }}
           dangerouslySetInnerHTML={{ __html: section.customHtml }}
@@ -309,7 +309,7 @@ export default function LandingPageRenderer({ data }: { data: LandingPageData })
         style={{
           backgroundColor: section.backgroundColor || '#ffffff',
           backgroundImage: section.backgroundImage ? `url(${section.backgroundImage})` : undefined
-        }}
+        } as React.CSSProperties}
       >
         <div className="max-w-6xl mx-auto">
           {section.title && (
