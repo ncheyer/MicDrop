@@ -55,7 +55,6 @@ export default function CreateLandingPage() {
   const [metaTitle, setMetaTitle] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
   const [sections, setSections] = useState<Section[]>([]);
-  const [customGpts, setCustomGpts] = useState<Array<{name: string; description: string; url: string}>>([]);
   
   // Talk pages for linking
   const [talkPages, setTalkPages] = useState<any[]>([]);
@@ -140,7 +139,9 @@ export default function CreateLandingPage() {
         };
       case 'gpts':
         return {
-          showGpts: true
+          gpts: [
+            { name: 'Example GPT', description: 'Add your GPT description here', url: 'https://chat.openai.com/g/...' }
+          ]
         };
       default:
         return {};
@@ -196,8 +197,7 @@ export default function CreateLandingPage() {
           metaTitle: metaTitle || title,
           metaDescription: metaDescription || description,
           talkPageId: selectedTalkPageId || undefined,
-          sections,
-          customGpts
+          sections
         })
       });
 
@@ -381,7 +381,7 @@ export default function CreateLandingPage() {
                         </div>
                       </div>
                       
-                      {/* Section content editor would go here */}
+                      {/* Section content editor */}
                       <div className="space-y-2">
                         <input
                           type="text"
@@ -397,6 +397,74 @@ export default function CreateLandingPage() {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                           placeholder="Section subtitle"
                         />
+                        
+                        {/* GPT Section Editor */}
+                        {section.type === 'gpts' && (
+                          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                            <h4 className="text-sm font-medium text-gray-700 mb-3">GPT Links</h4>
+                            <div className="space-y-2">
+                              {(section.content?.gpts || []).map((gpt: any, gptIndex: number) => (
+                                <div key={gptIndex} className="p-2 bg-white border border-gray-200 rounded">
+                                  <input
+                                    type="text"
+                                    value={gpt.name || ''}
+                                    onChange={(e) => {
+                                      const newContent = { ...section.content };
+                                      if (!newContent.gpts) newContent.gpts = [];
+                                      newContent.gpts[gptIndex] = { ...newContent.gpts[gptIndex], name: e.target.value };
+                                      updateSection(index, { content: newContent });
+                                    }}
+                                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded mb-1"
+                                    placeholder="GPT Name"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={gpt.description || ''}
+                                    onChange={(e) => {
+                                      const newContent = { ...section.content };
+                                      newContent.gpts[gptIndex] = { ...newContent.gpts[gptIndex], description: e.target.value };
+                                      updateSection(index, { content: newContent });
+                                    }}
+                                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded mb-1"
+                                    placeholder="Description"
+                                  />
+                                  <input
+                                    type="url"
+                                    value={gpt.url || ''}
+                                    onChange={(e) => {
+                                      const newContent = { ...section.content };
+                                      newContent.gpts[gptIndex] = { ...newContent.gpts[gptIndex], url: e.target.value };
+                                      updateSection(index, { content: newContent });
+                                    }}
+                                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded mb-1"
+                                    placeholder="https://chat.openai.com/g/..."
+                                  />
+                                  <button
+                                    onClick={() => {
+                                      const newContent = { ...section.content };
+                                      newContent.gpts = newContent.gpts.filter((_: any, i: number) => i !== gptIndex);
+                                      updateSection(index, { content: newContent });
+                                    }}
+                                    className="text-red-600 text-xs hover:underline"
+                                  >
+                                    Remove GPT
+                                  </button>
+                                </div>
+                              ))}
+                              <button
+                                onClick={() => {
+                                  const newContent = { ...section.content };
+                                  if (!newContent.gpts) newContent.gpts = [];
+                                  newContent.gpts.push({ name: '', description: '', url: '' });
+                                  updateSection(index, { content: newContent });
+                                }}
+                                className="w-full py-1 border border-dashed border-gray-300 rounded text-xs text-gray-600 hover:border-gray-400"
+                              >
+                                + Add GPT
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -460,71 +528,6 @@ export default function CreateLandingPage() {
                     placeholder={description || 'Page description'}
                   />
                 </div>
-              </div>
-            </div>
-
-            {/* GPT Management */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Bot className="h-5 w-5" />
-                GPT Links
-              </h3>
-              <div className="space-y-3">
-                {customGpts.map((gpt, index) => (
-                  <div key={index} className="p-3 border border-gray-200 rounded-lg">
-                    <div className="space-y-2">
-                      <input
-                        type="text"
-                        value={gpt.name}
-                        onChange={(e) => {
-                          const newGpts = [...customGpts];
-                          newGpts[index].name = e.target.value;
-                          setCustomGpts(newGpts);
-                        }}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                        placeholder="GPT Name"
-                      />
-                      <input
-                        type="text"
-                        value={gpt.description}
-                        onChange={(e) => {
-                          const newGpts = [...customGpts];
-                          newGpts[index].description = e.target.value;
-                          setCustomGpts(newGpts);
-                        }}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                        placeholder="Description"
-                      />
-                      <input
-                        type="url"
-                        value={gpt.url}
-                        onChange={(e) => {
-                          const newGpts = [...customGpts];
-                          newGpts[index].url = e.target.value;
-                          setCustomGpts(newGpts);
-                        }}
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                        placeholder="https://chat.openai.com/g/..."
-                      />
-                      <button
-                        onClick={() => {
-                          setCustomGpts(customGpts.filter((_, i) => i !== index));
-                        }}
-                        className="text-red-600 text-sm hover:underline"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                <button
-                  onClick={() => {
-                    setCustomGpts([...customGpts, { name: '', description: '', url: '' }]);
-                  }}
-                  className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-gray-400"
-                >
-                  + Add GPT Link
-                </button>
               </div>
             </div>
           </div>

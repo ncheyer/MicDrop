@@ -166,9 +166,13 @@ export default function LandingPageRenderer({ data }: { data: LandingPageData })
   };
 
   const renderGPTsSection = (section: Section) => {
-    const gpts = data.customGpts || [];
+    const gpts = section.content?.gpts || [];
     
-    if (gpts.length === 0) return null;
+    // Also check for GPTs from the main data if this is a talk page
+    const mainGpts = data.customGpts || [];
+    const allGpts = gpts.length > 0 ? gpts : mainGpts;
+    
+    if (allGpts.length === 0) return null;
 
     return (
       <section className="py-20 px-4" style={{ backgroundColor: section.backgroundColor as any || '#ffffff' }}>
@@ -182,9 +186,9 @@ export default function LandingPageRenderer({ data }: { data: LandingPageData })
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {gpts.map((gpt) => (
+            {allGpts.map((gpt: any, index: number) => (
               <a
-                key={gpt.id}
+                key={gpt.id || index}
                 href={gpt.url}
                 target="_blank"
                 rel="noopener noreferrer"
