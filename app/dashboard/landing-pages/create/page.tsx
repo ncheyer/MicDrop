@@ -35,7 +35,7 @@ interface Section {
 const SECTION_TYPES = [
   { id: 'hero', name: 'Hero Section', icon: Layout, description: 'Eye-catching header with CTA' },
   { id: 'features', name: 'Features', icon: Zap, description: 'Highlight key features' },
-  { id: 'gpts', name: 'GPTs & AI Tools', icon: Bot, description: 'Showcase AI assistants' },
+  { id: 'gpts', name: 'GPTs & AI Tools', icon: Bot, description: 'Showcase custom AI assistants' },
   { id: 'cta', name: 'Call to Action', icon: MessageSquare, description: 'Drive conversions' },
   { id: 'testimonials', name: 'Testimonials', icon: MessageSquare, description: 'Social proof' },
   { id: 'faq', name: 'FAQ', icon: HelpCircle, description: 'Answer common questions' },
